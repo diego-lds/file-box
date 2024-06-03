@@ -1,69 +1,42 @@
-// This is used for getting user input.
-import { createInterface } from "readline/promises";
+// server.js
+import express from "express";
+import { fileURLToPath } from "url";
+import fileUpload from "express-fileupload";
+import cors from "cors";
 
-import {
-  S3Client,
-  PutObjectCommand,
-  CreateBucketCommand,
-  DeleteObjectCommand,
-  DeleteBucketCommand,
-  paginateListObjectsV2,
-  GetObjectCommand,
-  ListObjectsCommand,
-} from "@aws-sdk/client-s3";
+import { deleteFile, listAllFiles, uploadFile } from "./service.js";
 
-const credentials = {
-  accessKeyId: "YIBXBX5B22Y4PZISWERY",
-  secretAccessKey: "oi00WUXuCoyXtvLwoAK8B1WtmWbBQqsRfe5iNoUy",
-};
-const client = new S3Client({
-  endpoint: "https://br-gru-1.linodeobjects.com",
-  region: "br-gru-1",
-  credentials: credentials,
+const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    optionsSuccessStatus: 200,
+  })
+);
+app.use(express.json());
+app.use(fileUpload());
+
+app.get("/files", async (req, res) => {
+  console.log(1);
+  const files = await listAllFiles();
+  res.json({ files });
+});
+app.post("/upload", (req, res) => {
+  uploadFile(req.files.file);
+  res.json({ message: "Arquivo criado com sucesso" });
 });
 
-const params = {
-  Bucket: "file-box",
-  Key: "file.txt",
-  Body: "sou arquivo",
-  ACL: "public-read",
-};
-export async function main() {
-  // uploadObject(client, params);
-  // deleteObject(client, params);
-  listObjects(client, params);
-}
+app.delete("/files/:bucketName/:key", (req, res) => {
+  const { bucketName, key } = req.params;
 
-async function uploadObject(client, params) {
-  try {
-    await client.send(new PutObjectCommand(params));
-    console.log(
-      `arquivo ${params.Key} criado com sucesso em [${params.bucket}]`
-    );
-  } catch (error) {
-    console.log(`erro ao fazer upload de arquivo`, error);
-  }
-}
-async function deleteObject(client, params) {
-  try {
-    await client.send(new DeleteObjectCommand(params));
-    console.log(
-      `arquivo ${params.Key} criado com sucesso em [${params.bucket}]`
-    );
-  } catch (error) {
-    console.log(`erro ao fazer upload de arquivo`, error);
-  }
-}
+  const result = deleteFile({ Bucket: bucketName, Key: key });
 
-async function listObjects(client, params) {
-  try {
-    const { Contents } = await client.send(new ListObjectsCommand(params));
-    for (let obj of Contents) {
-      console.log(obj.Key);
-    }
-  } catch (error) {}
-}
+  res.json(result);
+});
 
-try {
-  main();
-} catch (error) {}
+app.listen(3000, () => {
+  console.info(`Server is running on http://localhost:3000`);
+});
