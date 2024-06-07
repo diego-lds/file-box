@@ -1,14 +1,12 @@
-// server.js
 import express from "express";
 import { fileURLToPath } from "url";
 import fileUpload from "express-fileupload";
 import cors from "cors";
-
-import { deleteFile, listAllFiles, uploadFile } from "./service.js";
+import morgan from "morgan";
+import filesRouter from "./routes/files.js";
+import errorHandler from "./utils/errorHandler.js";
 
 const app = express();
-
-const __filename = fileURLToPath(import.meta.url);
 
 app.use(
   cors({
@@ -18,25 +16,15 @@ app.use(
 );
 app.use(express.json());
 app.use(fileUpload());
+app.use(morgan("dev"));
 
-app.get("/files", async (req, res) => {
-  console.log(1);
-  const files = await listAllFiles();
-  res.json({ files });
-});
-app.post("/upload", (req, res) => {
-  uploadFile(req.files.file);
-  res.json({ message: "Arquivo criado com sucesso" });
-});
+// Rotas
+app.use("/files", filesRouter);
 
-app.delete("/files/:bucketName/:key", (req, res) => {
-  const { bucketName, key } = req.params;
+// Middleware de tratamento de erros
+app.use(errorHandler);
 
-  const result = deleteFile({ Bucket: bucketName, Key: key });
-
-  res.json(result);
-});
-
-app.listen(3000, () => {
-  console.info(`Server is running on http://localhost:3000`);
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.info(`Server is running on http://localhost:${PORT}`);
 });

@@ -1,14 +1,10 @@
 import {
   S3Client,
   PutObjectCommand,
-  CreateBucketCommand,
   DeleteObjectCommand,
-  DeleteBucketCommand,
-  paginateListObjectsV2,
-  GetObjectCommand,
   ListObjectsCommand,
 } from "@aws-sdk/client-s3";
-import { getFileExtension } from "./utils.js";
+import { getFileExtension } from "../utils/getFIleExtension.js";
 
 const ENDPOINT = "https://br-gru-1.linodeobjects.com";
 const REGION = "br-gru-1";
@@ -32,14 +28,29 @@ async function listAllFiles() {
       })
     );
 
+    const types = {
+      txt: "document",
+      doc: "document",
+      docx: "document",
+      pdf: "document",
+      png: "image",
+      jpg: "image",
+      mp3: "audio",
+      mp4: "video",
+      zip: "compressed",
+      rar: "compressed",
+    };
+
     const files = result.Contents.map((file) => ({
       extension: getFileExtension(file.Key),
+      type: types[getFileExtension(file.Key)],
       etag: file.ETag.replace(/"/g, ""),
       name: file.Key,
       size: file.Size,
       lastModified: new Date(file.LastModified),
       url: `https://file-box.br-gru-1.linodeobjects.com/${file.Key}`,
     }));
+
     return files;
   } catch (error) {}
 }
