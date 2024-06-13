@@ -10,13 +10,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    optionsSuccessStatus: 200,
-  })
-);
-app.use(
-  cors({
-    origin: process.env.FRONT_URL,
+    origin: "https://file-box-front.vercel.app",
     optionsSuccessStatus: 200,
   })
 );
