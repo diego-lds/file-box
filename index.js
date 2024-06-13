@@ -14,6 +14,13 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
+app.use(
+  cors({
+    origin: process.env.FRONT_URL,
+    optionsSuccessStatus: 200,
+  })
+);
+
 app.use(express.json());
 app.use(fileUpload());
 app.use(morgan("dev"));
