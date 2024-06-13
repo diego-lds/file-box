@@ -4,18 +4,16 @@ import {
   DeleteObjectCommand,
   ListObjectsCommand,
 } from "@aws-sdk/client-s3";
-import { getFileExtension } from "../utils/getFIleExtension.js";
-
-const ENDPOINT = "https://br-gru-1.linodeobjects.com";
-const REGION = "br-gru-1";
+import getFileExtension from "../utils/getFileExtension.js";
+import config from "../config.js";
 
 const credentials = {
-  accessKeyId: "YIBXBX5B22Y4PZISWERY",
-  secretAccessKey: "oi00WUXuCoyXtvLwoAK8B1WtmWbBQqsRfe5iNoUy",
+  accessKeyId: config.accessKeyId,
+  secretAccessKey: config.secretAccessKey,
 };
 const client = new S3Client({
-  endpoint: ENDPOINT,
-  region: REGION,
+  endpoint: config.endpoint,
+  region: "br-gru-1",
   credentials: credentials,
 });
 
@@ -27,6 +25,8 @@ async function listAllFiles() {
         ACL: "public-read",
       })
     );
+
+    console.log(result);
 
     const types = {
       txt: "document",

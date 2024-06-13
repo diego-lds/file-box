@@ -1,5 +1,5 @@
 import express from "express";
-import { fileURLToPath } from "url";
+
 import fileUpload from "express-fileupload";
 import cors from "cors";
 import morgan from "morgan";
