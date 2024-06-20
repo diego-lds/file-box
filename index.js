@@ -9,6 +9,7 @@ import { configDotenv } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import compression from "compression";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,23 +25,27 @@ const baseUrl =
   (isProduction() ? "https://api.minhaprodurl.com" : "http://localhost:3000");
 
 app.use(express.static(path.join(__dirname, "dist")));
+app.use(compression());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://localhost:3000",
+  "https://file-box-front.vercel.app",
+];
 
 app.use(
   cors({
-    origin: "https://file-box-front.vercel.app",
-    optionsSuccessStatus: 200,
-  })
-);
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    optionsSuccessStatus: 200,
-  })
-);
-app.use(
-  cors({
-    origin: "http://localhost:4173",
-    optionsSuccessStatus: 200,
+    origin: function (origin, callback) {
+      // Permite requests sem origem (como clientes mobile ou curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
   })
 );
 
