@@ -17,12 +17,14 @@ router.get("/", async (req, res, next) => {
 });
 
 router.post("/upload", async (req, res, next) => {
+  const { file } = req.files;
+  const { userId } = req.body;
   try {
-    if (!req.files || !req.files.file) {
+    if (!req.files || !file) {
       return res.status(400).json({ message: "Nenhum arquivo enviado" });
     }
 
-    await uploadFile(req.files.file);
+    await uploadFile(file, userId);
     res.json({ message: "Arquivo criado com sucesso" });
   } catch (error) {
     next(error);

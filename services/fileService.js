@@ -55,7 +55,7 @@ async function listAllFiles() {
   } catch (error) {}
 }
 
-async function uploadFile(file) {
+async function uploadFile(file, userId) {
   try {
     await client.send(
       new PutObjectCommand({
@@ -82,5 +82,21 @@ async function deleteFile(params) {
     console.log(`erro ao fazer upload de arquivo`, error);
   }
 }
+
+const checkBucketExists = async (bucketName) => {
+  try {
+    await client.send(
+      new HeadBucketCommand({
+        Bucket: bucketName,
+      })
+    );
+    return true;
+  } catch (error) {
+    if (error.name === "NotFound") {
+      return false;
+    }
+    throw error;
+  }
+};
 
 export { listAllFiles, uploadFile, deleteFile };
